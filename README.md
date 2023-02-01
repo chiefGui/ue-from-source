@@ -17,10 +17,14 @@ Building Unreal Engine from source may be a dauting task, but it's not as hard a
   - [Troubleshooting](#troubleshooting)
 - [Creating an Installed Build](#creating-an-installed-build)
   - [What is an Installed Build?](#what-is-an-installed-build)
+  - [Is an Installed Build for me?](#is-an-installed-build-for-me)
   - [Before we begin](#before-we-begin-1)
   - [Step-by-step](#step-by-step-1)
     - [Building the Automation Tool](#building-the-automation-tool)
     - [Creating the Install Build script](#creating-the-install-build-script)
+    - [Installing the prerequisites](#installing-the-prerequisites-1)
+      - [Downloading Visual Studio 2019](#downloading-visual-studio-2019)
+      - [Getting .NET 4.5](#getting-net-45)
     - [Running the script](#running-the-script)
     - [Distributing your fresh Installed Build](#distributing-your-fresh-installed-build)
   - [Troubleshooting](#troubleshooting-1)
@@ -210,21 +214,30 @@ Well, you have plenty of options.
 - You can ask Billy to build the engine from source himself, but hey, Billy doesn't even remember what Visual Studio is.
 - **Or you can create an Installed Build!**
 
+**_Note to AngelScript people: this guide also applies to you as is!_**
+
 ## What is an Installed Build?
 
-The quickest example of an Installed Build is the retail version of Unreal Engine&mdash;the one you download from the Epic Games' Launcher.
+The quickest example of what an Installed Build is, is the retail version of Unreal Engine&mdash;the one you download from the Epic Games' Launcher. That is an Installed Build.
 
-Installed Builds are compiled versions of the Engine that can be distributed to other people out-of-the-box. They are smaller than the source code version and mostly only requires you to zip it and send it about.
+Installed Builds are compiled versions of the Engine that can be distributed to other people out-of-the-box, with almost no hassle. They are smaller than the source code version and mostly only requires you to zip it and send it about.
 
-_Note to AngelScript people: this guide also applies to you as is!_
+## Is an Installed Build for me?
+
+I introduced this section with the Billy example, where an Installed Build would be useful if you wanted to share your engine with someone else&mdash;but other scenarios are:
+
+- If you just wanted to make one small tweak to the source code of the engine and nothing more. In this case, you can generate an Installed Build and get rid of the source code, saving you some disk space.
+- It already happened to me to change a C++ file in the scope of my project and, for some reason, the entire engine started compiling again&mdash;and I don't remember playing with the `Intermediate` folder. If you are afraid of that and your work with the Engine code is done, you can generate an Installed Build and get rid of the source code&mdash;which also saves you some disk space.
+- If you only built from source because of Dedicated Servers, you can generate an Installed Build of the Engine _with_ the Dedicated Server support and get rid of the source code.
+- My most recent case may be a little bit more specific, but it's a case nonetheless: I just wanted a "lighter" version of the 5.1 Engine with [Angelscript](#faq).
 
 ## Before we begin
 
 Ok, so you want to create an Installed Build. That's great! But before you do that, you need to know a few things:
 
-- You need to comply with all the things described by the [Building from Source](#building-from-source) section, as well as having the engine built from source successfully.
-- You'll need ≈100GB of (extra) free space, ideally in an SSD. _Yes, all that space to build the engine from source plus ≈100GB._
-- You'll need **lots** of patience. In my experience, this process takes at least twice as much time as building the engine from source. It's a very slow process, so keep calm. _Note that the time may vary depending on your hardware._]
+- You need to comply with all the things described by the [Building from Source](#building-from-source) section, as well as having the built from source engine successfully built.
+- You're going to need ≈100GB of (extra) free space, ideally in an SSD. _Yes, all that space to build the engine from source plus ≈100GB._
+- You're going to need **lots** of patience. In my experience, this process takes at least twice as much time as building the engine from source. It's a very slow process, so keep calm. _Note that the time may vary depending on your hardware._]
 - If you have the luxury of having yet another extra ≈180GB lyring around, I'd recommend you backing up your source code folder before venturing into Installed Builds. The first time I generated the Installed Build, it failed silently and messed up my source code folder. In short, I had to start the process of building from source all over again. I was definitely not happy, specially after waiting for more or less 4 hours to finish the Install Build process only to have it double fail: one for the Install Build itself and another for the engine build.
 
 **_Most of the credits here go to Joe, from Asset Pack Games, who published [an excellent video](https://www.youtube.com/watch?v=YX85Z57_T0k) on how to create an Installed Build. I've just tested it myself with the latest version of the Engine (5.1 at the time of writing), tweaked a few things and, of course, ported to a text-based guide._**
@@ -248,9 +261,13 @@ Ok, so you want to create an Installed Build. That's great! But before you do th
 ```batch
 echo off
 
-:: The actual script, which will generate the Installed Build using the Automation Tool and the BuildGraph.
-cd Engine\Binaries\DotNET\AutomationTool AutomationTool.exe BuildGraph -target="Make Installed Build Win64" -script=Engine/Build/InstalledEngineBuild.xml -set:HostPlatformOnly=true
+:: Move to the AutomationTool folder.
+cd Engine\Binaries\DotNET\AutomationTool
 
+:: The actual script, which will generate the Installed Build using the Automation Tool and the BuildGraph.
+AutomationTool.exe BuildGraph -target="Make Installed Build Win64" -script=Engine/Build/InstalledEngineBuild.xml -set:HostPlatformOnly=true
+
+:: Just an empty line to separate the outputs.
 echo.
 
 :: Just a friendly reminder to the user that the process is done.
@@ -289,9 +306,39 @@ All of the above to say: **customise this script as much as you like to fit your
 
 3. Save the file and close it.
 
+### Installing the prerequisites
+
+_I intentionally chose not to include this step earlier because I didn't want to cause confusion._
+
+Before you run the script, there's one extra step though, which is installing Visual Studio 2019. The reason why, you may ask, it's because it includes .NET 4.5 which is required for [UBT](https://docs.unrealengine.com/4.27/en-US/ProductionPipelines/BuildTools/UnrealBuildTool/). **If you don't do this, you are prone to spend hours generating your Install Build to have it fail at the end.**
+
+#### Downloading Visual Studio 2019
+
+1. Head to [this page](https://my.visualstudio.com/Downloads?q=visual%20studio%202019&wt.mc_id=o~msft~vscom~older-downloads).
+2. Log in with your Microsoft account.
+3. Download the `Community` version of Visual Studio 2019:
+
+![Image](/img/1675281136138.png)
+
+#### Getting .NET 4.5
+
+1. Run the installer you just downloaded.
+2. Once do, you should be seeing a window like this:
+
+![Image](/img/1675281233360.png)
+
+3. Click on `Modify` in your Visual Studio 2019 installation.
+4. Select `.NET desktop development` and click `Modify`:
+
+![Image](/img/1675281377162.png)
+
+_If you want a cleaaner installation of Visual Studio 2019, you can uncheck some optional components once you selected the `.NET desktop development` option:_
+
+![Image](/img/1675282104898.png)
+
 ### Running the script
 
-Fasten your belt because it's show time.
+Finally fasten your belt because it's show time.
 
 1. Run the `GenerateInstalledBuild.bat` script you just created.
 2. Wait.
@@ -309,13 +356,13 @@ If everything went well, you should see a `LocalBuilds` folder at the same level
 
 ### Distributing your fresh Installed Build
 
-Now that you have your Installed Build, you can distribute it out and about. And there's nothing magical here, really. You just zip the `LocalBuilds/Engine` folder and you should be good to go.
+Now that you have your Installed Build, you can distribute it out and about. And there's nothing special here, really. You just zip the `LocalBuilds/Engine` folder and you should be good to go.
 
 ## Troubleshooting
 
 1. [Make sure you went through the Building from Source section](#building-from-source).
 2. [Make sure you went through the Troubleshooting from the Building from Source section](#troubleshooting).
-3. It's very possible that it will cost you a lot of time until an error from the InstallBuild script pops up. One way to mitigate that is by forcing an expected error to happen. For example, if you're building for `Win64`, you can force the script to fail by changing the `-target` parameter to `-target="Make Installed Build Mac"`. This way, you'll know if the script is working or not much quicker than waiting for the whole process to finish.
+3. It's very possible that it will cost you a lot of time until an error from the InstallBuild script pops up. One way to mitigate that is by forcing an expected error to happen. For example, if you're building for `Win64`, you can force the script to fail by changing the `-target` parameter to `-target="Make Installed Build Mac"`. This way, you're going to know if the script is working or not much quicker than waiting for the whole process to finish.
 
 # General references
 
@@ -416,6 +463,34 @@ Only if you are changing Engine code is that you should build the `UE5` project.
 </details>
 
 <details>
+<summary><strong>Can my teammates use the Retail version to develop our project while I use a built from source version?</strong></summary>
+<p>
+
+It depends on a lot of factors and I'm not able to cover them all. Instead, I'm going to give you some clarification and you can decide for yourself whether using different Engine versions is a good idea or not.
+
+Let's say you created your project with UE 5.1. Then, UE 5.1 introduced this feature everyone's talking about and you decided to use it as well.
+
+Because of whatever reason you decided to open your project in UE 5.0, where that juicy feature is unavailable&mdash;well, as you may have guessed, anywhere in your project that feature is being used will be broken somehow to the point where I even heard stories of permanent damage because of some wild file corruption.
+
+And this is a reality not only for what meets the eye. Sometimes, between one version and another, there are some tweaks that changed the behavior of a specific thing not obvious at first. Imagine that Epic simply changed the value of a variable from `0` to `1` in a function that does something with Character movement. You may not notice it at first, but it may cause inconsistencies among the different versions your teammates are using, leading to confusion and frustration.
+
+All the above is no exception with versions built from source. For example, if you are building 5.1 from source and made a change to it while another teammate made yet another change. The two versions of the engine will be somewhat incompatible with each other.
+
+To sum up, here are some bullet points:
+
+- If you built 5.1 from the `release` branch and made no changes to it, and your teammate is using 5.1 from the Launcher, you two are good. _If this is the case, probably building from source is not relevant to you at all._
+- If the only changes you made to the Engine are purely aesthetic (e.g. changing the color of a button of the editor), you two are good.
+- If you only built from source only to package dedicated servers, you two are good.
+- If you _don't know_ the differences between your Engine version and the version of your teammate, you two probably don't want to use different versions of the Engine.
+
+**Please take the above with a grain of salt.** I am no expert to cirurgically point what will go wrong or not, and the subject has nuances all around. This is just me giving you the broad strokes of what _I_ think about what looks good and what not. I never used different versions of the Engine in the same project myself, so your mileage may vary.
+
+I dare to say that the truth is: if you don't know what you are doing, don't put your project at risk. Just use the same version of the Engine as your teammates and go build something Unreal.
+
+</p>
+</details>
+
+<details>
 <summary>
 <strong>Where should I put my plugins in my built from source Engine?</strong>
 </summary>
@@ -476,7 +551,7 @@ Both your project and the Engine have an "Intermediate" folder each. If you dele
 
 Doing it for your project is not that of a big deal depending on the size of it, but doing it for the Engine is not for the faint. At this point, you may know that compiling the Engine is a very exhaustive process.
 
-The Intermediate folder is a cache of sorts. It contains all the intermediate files that are generated during the build process. If you delete it, you'll lose your "build cache", hence you'll need to recompile everything from scratch as if you were building it for the first time.
+The Intermediate folder is a cache of sorts. It contains all the intermediate files that are generated during the build process. If you delete it, you're going to lose your "build cache", hence you're going to recompile everything from scratch as if you were building it for the first time.
 
 In short, if you are not sure if you should delete it, don't.
 
@@ -499,53 +574,25 @@ You can read more about it [here](https://docs.unrealengine.com/4.27/en-US/Produ
 </details>
 
 <details>
-<summary><strong>What is Unreal Angelscript?</strong></summary>
-
-According to their [own website](https://angelscript.hazelight.se/):
-
-> UnrealEngine-Angelscript is a set of engine modifications and a plugin for UE5 that integrates a full-featured scripting language. It is actively developed by [Hazelight](https://www.hazelight.com/), creators of [It Takes Two](https://www.it-takestwo.com/), which was shipped with the majority of its gameplay written in angelscript. The unreal plugin that integrates angelscript is open source, and has received contributions from several studios in Stockholm and globally.
-
-In my opinion, Angelscript makes programming in Unreal Engine _funnier_ than ever.
-
-- Most of the changes you make to your Angelscript code are _properly_ hot-reloaded, meaning almost instantenous feedback on the changes you write. (Please, don't confuse this with the doomed Hot Reload feature for C++ [that was replaced by Live Coding in UE5](https://forums.unrealengine.com/t/ue5-breaking-and-noteworthy-changes/264964))
-- From the scripting aspect, you benefit from code diffing&mdash;hardly achievable with Blueprints.
-- You mostly no longer have to deal with the verbosity and wackiness of C++, making programming more accessible and enjoyable to the average/beginner programmer.
-- _Have I mentioned most of the changes you make don't even require you to leave [PIE](https://docs.unrealengine.com/5.0/en-US/play-in-editor-settings-in-unreal-engine/)?_
-
-Ultimately I'd like to note that Angelscript **does not** replace Blueprints or C++ by any means. Instead, it's a complementary tool that can be used to speed up the development process and make it more enjoyable. _C++ is still the de-facto "the sky is the limit" language, as well as the go-to place for performance-critical code._
-
-_A big thank you to [Hazelight](https://www.hazelight.com/) for not only making it possible, but also for sharing it all with the community. Also, thank you Eren for presenting it to me!_
-
-</details>
-
-<details>
-<summary><strong>What does Unreal Angelscript have to do with building from source?</strong></summary>
-<p>
-
-1. Hazelight's Unreal Engine Angelscript is not just a plugin. It's a fork of the Engine itself with custom modifications, needed to make it work with Angelscript. As such, you need their custom Unreal Engine version if you want to use Angelscript.
-
-2. As the time of writing this, there's no binary version for Unreal Engine Angelscript, meaning you have to build it from source yourself. _If you're okay using 5.0.2, you can skip all of this and download the binary version from [here](https://github.com/Hazelight/UnrealEngine-Angelscript/releases/tag/v5.0.2-angelscript)._
-
-</p>
-</details>
-
-<details>
 <summary><strong>My Installed Build is still immense! Why?</strong></summary>
 <p>
 
 Unfortunately I don't have a good answer for this.
 
-I tried my best to make the Installed Build as small as possible myself, but it's still big for me nonetheless&mdash;reaching no less than 100GB.
+I tried my best to make the Installed Build as small as possible myself, but it's still big for me despite my all my effort&mdash;I never reached less than the 100GB mark.
 
 What I can say though is that the more platforms you target to build to, the bigger the Installed Build will be. For example, if you target Windows, Linux, and Mac, your Installed Build will be bigger than if you only target Windows.
 
-However, some benefits still:
+</p>
+</details>
 
-1. It's still smaller than the size of the engine built from source.
-2. Nobody has to build the engine themselves, which is a huge time-saver.
-3. By zipping the Installed Build, you can at least make the download even smaller and more accessible.
+<details>
+<summary><strong>Why is my Installed Build bigger than Epic's retail version?</strong></summary>
+<p>
 
-At the end of the day, your teammates will thank you for it.
+I don't know what they do to make their retail version smaller than our Installed Build. Not sure whether they use some sort of compression or there's something special they do to make it smaller.
+
+If you find it out, please let me know.
 
 </p>
 </details>
@@ -557,6 +604,35 @@ At the end of the day, your teammates will thank you for it.
 Yes.
 
 If you are constantly changing things at the Engine level, I'd say perhaps Installed Builds are not for you. Instead, you should consider asking your teammates to build the Engine from source themselves.
+
+</p>
+</details>
+
+<details>
+<summary><strong>Can I throw away the Engine source code after generating an Installed Build?</strong></summary>
+<p>
+
+If your Installed Build was generated successfully and you could open it from the `LocalBuilds/Engine` folder, then yes, you can throw away the Engine source code if it's no longer needed.
+
+</p>
+</details>
+
+<details>
+<summary><strong>I don't see any LocalBuilds folder after generating my Installed Build. Why?</strong></summary>
+<p>
+
+Something went wrong during the generation process, even when not apparently so.
+
+Your best bet is to check the log files in `Engine/Programs/AutomationTool/Saved/Logs/Log.txt` and scroll all the way to the bottom. Read the last few lines on it and look for potential errors.
+
+</p>
+</details>
+
+<details>
+<summary><strong>How do I fix the ".NET 4.5/Microsoft.CSharp.Core.targets was not found" error?</strong></summary>
+<p>
+
+You probably missed or skipped the part described at [Installing the prerequisites](#installing-the-prerequisites-1) for the Installed Build procedure.
 
 </p>
 </details>
@@ -592,6 +668,39 @@ I suppose you may be referring to [this](https://github.com/ryanjon2040/Unreal-B
 I've tried it myself, but it seems it lacks support for Unreal Engine 5.1 and requires Visual Studio 2019. Other than that, it seemed to be a lovely tool that would ease the entire process of building Unreal Engine from source and creating an Installed Build.
 
 PRO TIP: It's licensed under [MIT](https://github.com/ryanjon2040/Unreal-Binary-Builder/blob/master/LICENSE.md), so if you know C# and are willing to support it, go ahead and do so&mdash;the community would definitely appreciate it!
+
+</p>
+</details>
+
+<details>
+<summary><strong>What is Unreal Angelscript?</strong></summary>
+<p>
+
+According to their [own website](https://angelscript.hazelight.se/):
+
+> UnrealEngine-Angelscript is a set of engine modifications and a plugin for UE5 that integrates a full-featured scripting language. It is actively developed by [Hazelight](https://www.hazelight.com/), creators of [It Takes Two](https://www.it-takestwo.com/), which was shipped with the majority of its gameplay written in angelscript. The unreal plugin that integrates angelscript is open source, and has received contributions from several studios in Stockholm and globally.
+
+In my opinion, Angelscript makes programming in Unreal Engine _funnier_ than ever.
+
+- Most of the changes you make to your Angelscript code are _properly_ hot-reloaded, meaning almost instantenous feedback on the changes you write. (Please, don't confuse this with the doomed Hot Reload feature for C++ [that was replaced by Live Coding in UE5](https://forums.unrealengine.com/t/ue5-breaking-and-noteworthy-changes/264964))
+- From the scripting aspect, you benefit from code diffing&mdash;hardly achievable with Blueprints.
+- You mostly no longer have to deal with the verbosity and wackiness of C++, making programming more accessible and enjoyable to the average/beginner programmer.
+- _Have I mentioned most of the changes you make don't even require you to leave [PIE](https://docs.unrealengine.com/5.0/en-US/play-in-editor-settings-in-unreal-engine/)?_
+
+Ultimately I'd like to note that Angelscript **does not** replace Blueprints or C++ by any means. Instead, it's a complementary tool that can be used to speed up the development process and make it more enjoyable. _C++ is still the de-facto "the sky is the limit" language, as well as the go-to place for performance-critical code [(note that AS can be transpiled to C++)](https://angelscript.hazelight.se/cpp-bindings/precompiled-data/)._
+
+_A big thank you to [Hazelight](https://www.hazelight.com/) for not only making it possible, but also for sharing it all with the community. Also, thank you Eren for presenting it to me!_
+
+</p>
+</details>
+
+<details>
+<summary><strong>What does Unreal Angelscript have to do with building from source?</strong></summary>
+<p>
+
+1. Hazelight's Unreal Engine Angelscript is not just a plugin. It's a fork of the Engine itself with custom modifications, needed to make it work with Angelscript. As such, you need their custom Unreal Engine version if you want to use Angelscript.
+
+2. As the time of writing this, there's no binary version for Unreal Engine Angelscript, meaning you have to build it from source yourself. _If you're okay using 5.0.2, you can skip all of this and download the binary version from [here](https://github.com/Hazelight/UnrealEngine-Angelscript/releases/tag/v5.0.2-angelscript)._
 
 </p>
 </details>
